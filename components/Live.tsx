@@ -1,4 +1,3 @@
-import { useBroadcastEvent, useEventListener, useMyPresence, useOthers } from "@liveblocks/react";
 import React, { useCallback, useEffect, useState } from "react";
 import LiveCursors from "./cursor/LiveCursors";
 import { CursorMode, CursorState, Reaction, ReactionEvent } from "@/types/type";
@@ -6,6 +5,7 @@ import CursorChat from "./cursor/CursorChat";
 import ReactionSelector from "./reaction/ReactionButtons";
 import FlyingReaction from "./reaction/FlyingReaction";
 import useInterval from "@/hooks/useInterval";
+import { useOthers, useMyPresence, useBroadcastEvent, useEventListener } from "@/liveblocks.config";
 
 type Props = {
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
