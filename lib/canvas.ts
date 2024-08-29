@@ -388,10 +388,13 @@ export const handleResize = ({ canvas }: { canvas: fabric.Canvas | null }) => {
 
   if (!canvas) return;
 
-  canvas.setDimensions({
-    width: canvasElement.clientWidth,
-    height: canvasElement.clientHeight,
-  });
+  canvas.setWidth(canvasElement.clientWidth);
+  canvas.setHeight(canvasElement.clientHeight);
+
+  // canvas.setDimensions({
+  //   width: canvasElement.clientWidth,
+  //   height: canvasElement.clientHeight,
+  // });
 };
 
 // zoom canvas on mouse scroll
