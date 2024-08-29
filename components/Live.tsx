@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import LiveCursors from "./cursor/LiveCursors";
-import { CursorMode, CursorState, Reaction, ReactionEvent } from "@/types/type";
+import { CursorMode, CursorState, Reaction } from "@/types/type";
 import CursorChat from "./cursor/CursorChat";
 import ReactionSelector from "./reaction/ReactionButtons";
 import FlyingReaction from "./reaction/FlyingReaction";
 import useInterval from "@/hooks/useInterval";
 import {
-  useOthers,
   useMyPresence,
   useBroadcastEvent,
   useEventListener,
@@ -27,8 +26,7 @@ type Props = {
 };
 
 const Live = ({ canvasRef, undo, redo }: Props) => {
-  const others = useOthers();
-  const [{ cursor }, updateMyPresence] = useMyPresence() as any;
+  const [{ cursor }, updateMyPresence] = useMyPresence();
 
   const [cursorState, setCursorState] = useState<CursorState>({
     mode: CursorMode.Hidden,
@@ -69,7 +67,7 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
   }, 100);
 
   useEventListener((eventData) => {
-    const event = eventData.event as ReactionEvent;
+    const event = eventData.event;
 
     setReaction((reactions) =>
       reactions.concat([
@@ -235,7 +233,7 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
           <ReactionSelector setReaction={setReactions} />
         )}
 
-        <LiveCursors others={others} />
+        <LiveCursors />
 
         <Comments />
       </ContextMenuTrigger>
