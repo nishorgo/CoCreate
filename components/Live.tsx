@@ -5,16 +5,28 @@ import CursorChat from "./cursor/CursorChat";
 import ReactionSelector from "./reaction/ReactionButtons";
 import FlyingReaction from "./reaction/FlyingReaction";
 import useInterval from "@/hooks/useInterval";
-import { useOthers, useMyPresence, useBroadcastEvent, useEventListener } from "@/liveblocks.config";
+import {
+  useOthers,
+  useMyPresence,
+  useBroadcastEvent,
+  useEventListener,
+} from "@/liveblocks.config";
 import { Comments } from "./comments/Comments";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "./ui/context-menu";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "./ui/context-menu";
 import { shortcuts } from "@/constants";
 
 type Props = {
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
-}
+  undo: () => void;
+  redo: () => void;
+};
 
-const Live = ({ canvasRef }: Props) => {
+const Live = ({ canvasRef, undo, redo }: Props) => {
   const others = useOthers();
   const [{ cursor }, updateMyPresence] = useMyPresence() as any;
 
@@ -27,24 +39,32 @@ const Live = ({ canvasRef }: Props) => {
   const broadcast = useBroadcastEvent();
 
   useInterval(() => {
-    setReaction((reaction) => reaction.filter((r) => r.timestamp > Date.now() - 4000));
+    setReaction((reaction) =>
+      reaction.filter((r) => r.timestamp > Date.now() - 4000)
+    );
   }, 1000);
 
   useInterval(() => {
-    if(cursorState.mode === CursorMode.Reaction && cursorState.isPressed && cursor) {
-      setReaction((reactions) => reactions.concat([
-        {
-          point: { x: cursor.x, y: cursor.y },
-          value: cursorState.reaction,
-          timestamp: Date.now(),
-        }
-      ]))
+    if (
+      cursorState.mode === CursorMode.Reaction &&
+      cursorState.isPressed &&
+      cursor
+    ) {
+      setReaction((reactions) =>
+        reactions.concat([
+          {
+            point: { x: cursor.x, y: cursor.y },
+            value: cursorState.reaction,
+            timestamp: Date.now(),
+          },
+        ])
+      );
 
       broadcast({
         x: cursor.x,
         y: cursor.y,
         value: cursorState.reaction,
-      })
+      });
     }
   }, 100);
 
@@ -60,7 +80,7 @@ const Live = ({ canvasRef }: Props) => {
         },
       ])
     );
-  })
+  });
 
   const handlePointerMove = useCallback(
     (event: React.PointerEvent) => {
@@ -154,6 +174,32 @@ const Live = ({ canvasRef }: Props) => {
     });
   }, []);
 
+  const handleContextMenuClick = useCallback((key: string) => {
+    switch (key) {
+      case "Chat":
+        setCursorState({
+          mode: CursorMode.Chat,
+          previousMessage: null,
+          message: "",
+        });
+        break;
+      case "Undo":
+        undo();
+        break;
+      case "Redo":
+        redo();
+        break;
+      case "Reactions":
+        setCursorState({
+          mode: CursorMode.ReactionSelector
+        })
+        break;
+
+      default:
+        break;
+    }
+  }, []);
+
   return (
     <ContextMenu>
       <ContextMenuTrigger
@@ -168,12 +214,12 @@ const Live = ({ canvasRef }: Props) => {
 
         {reaction.map((r) => (
           <FlyingReaction
-          key={r.timestamp.toString()}
-          x={r.point.x}
-          y={r.point.y}
-          timestamp={r.timestamp}
+            key={r.timestamp.toString()}
+            x={r.point.x}
+            y={r.point.y}
+            timestamp={r.timestamp}
             value={r.value}
-            />
+          />
         ))}
 
         {cursor && (
@@ -194,7 +240,18 @@ const Live = ({ canvasRef }: Props) => {
         <Comments />
       </ContextMenuTrigger>
 
-      
+      <ContextMenuContent className="right-menu-content">
+        {shortcuts.map((item) => (
+          <ContextMenuItem
+            key={item.key}
+            onClick={() => handleContextMenuClick(item.name)}
+            className="right-menu-item"
+          >
+            <p>{item.name}</p>
+            <p className="text-xs text-primary-grey-300">{item.shortcut}</p>
+          </ContextMenuItem>
+        ))}
+      </ContextMenuContent>
     </ContextMenu>
   );
 };

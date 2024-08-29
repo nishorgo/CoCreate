@@ -194,6 +194,6 @@ export const shortcuts = [
   {
     key: "4",
     name: "Reactions",
-    shortcut: "E",
+    shortcut: "R",
   },
 ];
